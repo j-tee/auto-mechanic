@@ -24,6 +24,10 @@ ENV/
 env/
 .venv/
 .env.*
+.env.development
+.env.production
+.env.staging
+.env.testing
 # Environment variables
 *.env
 
