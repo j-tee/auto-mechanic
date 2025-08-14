@@ -54,7 +54,12 @@ class Part(models.Model):
     taxable = models.BooleanField(default=True)
     warranty_months = models.PositiveIntegerField(default=0)  # Default warranty
     stock_quantity = models.PositiveIntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
 
+    @property
+    def total_cost(self):
+        return self.unit_price * self.stock_quantity
+    
     def __str__(self):
         return f"{self.name} - {self.shop.name}"
 
