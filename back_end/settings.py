@@ -77,6 +77,11 @@ REST_AUTH_SERIALIZERS = {
     'TOKEN_SERIALIZER': 'dj_rest_auth.serializers.JWTSerializer',
 }
 
+REST_AUTH_REGISTER_SERIALIZERS = {
+    'REGISTER_SERIALIZER': 'back_end.serializers.CustomRegisterSerializer',
+}
+ACCOUNT_ADAPTER = "back_end.adapters.CustomAccountAdapter"
+
 # DRF & JWT
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [

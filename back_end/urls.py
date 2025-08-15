@@ -2,6 +2,7 @@
 from django.contrib import admin
 from django.urls import path, include
 # from two_factor.urls import urlpatterns as tf_urls
+from shop import views  # Adjust 'shop' to the correct app name if needed
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -15,6 +16,10 @@ urlpatterns = [
 
     # Social login
     path("api/auth/social/", include("allauth.socialaccount.urls")),
+     path('auth/social/google/', views.GoogleLogin.as_view(), name='google_login'),
+    path('auth/social/github/', views.GitHubLogin.as_view(), name='github_login'),
+    path('auth/social/facebook/', views.FacebookLogin.as_view(), name='facebook_login'),
+    # path('api/auth/social/', include('dj_rest_auth.social_urls')),
 
     # Two-factor authentication
     # path("account/", include("two_factor.urls", "two_factor")),

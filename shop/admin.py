@@ -29,13 +29,12 @@ class EmployeeAdmin(admin.ModelAdmin):
 
 @admin.register(Customer)
 class CustomerAdmin(admin.ModelAdmin):
-    # Removed 'shop' because Customer is no longer linked directly to a shop
-    list_display = ("name", "phone_number", "email", "total_vehicles")
+    list_display = ("name", "phone_number", "email", "vehicles_count")
 
-
-@admin.display(description="Vehicles", ordering='vehicles')
-def total_vehicles(self, obj):
-    return obj.vehicles.count()
+    def vehicles_count(self, obj):
+        return obj.vehicles.count()
+    vehicles_count.admin_order_field = "vehicles" # type: ignore[attr-defined]  # Optional: allows ordering by number of vehicles
+    vehicles_count.short_description = "Vehicles" # type: ignore[attr-defined]
 
 
 @admin.register(Appointment)
