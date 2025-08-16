@@ -1,6 +1,8 @@
 # adapters.py
 from allauth.account.adapter import DefaultAccountAdapter
 
+from back_end import settings
+
 class CustomAccountAdapter(DefaultAccountAdapter):
     """
     Adapter to override the default behavior and avoid _has_phone_field error.
@@ -24,3 +26,9 @@ class CustomAccountAdapter(DefaultAccountAdapter):
         if commit:
             user.save()
         return user
+
+    def get_email_confirmation_url(self, request, emailconfirmation):
+        """
+        Override default link to point to React frontend.
+        """
+        return f"{settings.FRONTEND_URL}/confirm-email/{emailconfirmation.key}/"
