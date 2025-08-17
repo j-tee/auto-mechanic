@@ -44,10 +44,12 @@ INSTALLED_APPS = [
     'django.contrib.sites',
     
     # Third-party apps
+     'rest_framework_simplejwt', 
     'allauth',
     'allauth.account',
     'allauth.socialaccount',
     'rest_framework',
+    'rest_framework.authtoken',
     'corsheaders',
     'dj_rest_auth',
     'dj_rest_auth.registration',
@@ -96,6 +98,7 @@ DATABASES = {
 
 # ====== Authentication & Authorization ======
 AUTHENTICATION_BACKENDS = [
+     'back_end.authentication.EmailBackend',
     'django.contrib.auth.backends.ModelBackend',
     'allauth.account.auth_backends.AuthenticationBackend',
 ]
@@ -110,13 +113,15 @@ AUTH_PASSWORD_VALIDATORS = [
 
 # Allauth settings
 SITE_ID = 1
-ACCOUNT_AUTHENTICATION_METHOD = "email"
-ACCOUNT_EMAIL_REQUIRED = True
+# Tell allauth what your username field is (if using default Django user model)
+ACCOUNT_USER_MODEL_USERNAME_FIELD = 'username'
 ACCOUNT_USERNAME_REQUIRED = False
-ACCOUNT_LOGIN_METHODS = ["email"]
-ACCOUNT_SIGNUP_FIELDS = ["email", "password1", "password2"]
+ACCOUNT_EMAIL_REQUIRED = True
+# Define which fields are required at signup
+ACCOUNT_SIGNUP_FIELDS = ["username", "email", "password1", "password2"]
 
-# Conditional email verification
+# Define how users can log in
+ACCOUNT_LOGIN_METHODS = ["email"]  # or just ["email"] if you prefer
 ACCOUNT_EMAIL_VERIFICATION = "mandatory" if ENVIRONMENT == "production" else "none"
 
 # Admin login
@@ -126,13 +131,23 @@ LOGIN_REDIRECT_URL = '/admin/'
 
 # ====== REST Framework & JWT ======
 REST_USE_JWT = True
+
+# Configure dj_rest_auth to use JWT properly
 REST_AUTH = {
+    'USE_JWT': True,
+    'JWT_AUTH_HTTPONLY': False,
+    'JWT_AUTH_COOKIE': 'access_token',
+    'JWT_AUTH_REFRESH_COOKIE': 'refresh_token',
+    # 'TOKEN_MODEL': None,
+    'TOKEN_SERIALIZER': 'back_end.serializers.EmailTokenObtainPairSerializer',
     'LOGIN_SERIALIZER': 'back_end.serializers.CustomLoginSerializer',
     'REGISTER_SERIALIZER': 'back_end.serializers.CustomRegisterSerializer',
-    'TOKEN_SERIALIZER': 'dj_rest_auth.serializers.JWTSerializer',
+    # 'JWT_SERIALIZER': None,  # Disable default JWT serializer
+    
 }
 ACCOUNT_ADAPTER = "back_end.adapters.CustomAccountAdapter"
 
+# Configure REST framework}
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.AllowAny',
@@ -147,7 +162,30 @@ SIMPLE_JWT = {
     'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
     'ROTATE_REFRESH_TOKENS': True,
     'BLACKLIST_AFTER_ROTATION': True,
-    "AUTH_HEADER_TYPES": ("Bearer",),
+    'UPDATE_LAST_LOGIN': True,  # Add this
+    'ALGORITHM': 'HS256',  # Add this
+    'SIGNING_KEY': SECRET_KEY,  # Add this
+    'VERIFYING_KEY': None,
+    'AUDIENCE': None,
+    'ISSUER': None,
+    'JSON_ENCODER': None,
+    'JWK_URL': None,
+    'LEEWAY': 0,
+    'AUTH_HEADER_TYPES': ('Bearer',),
+    'AUTH_HEADER_NAME': 'HTTP_AUTHORIZATION',
+    'USER_ID_FIELD': 'id',
+    'USER_ID_CLAIM': 'user_id',
+    'USER_AUTHENTICATION_RULE': 'rest_framework_simplejwt.authentication.default_user_authentication_rule',
+    'AUTH_TOKEN_CLASSES': ('rest_framework_simplejwt.tokens.AccessToken',),
+    'TOKEN_TYPE_CLAIM': 'token_type',
+    'TOKEN_USER_CLASS': 'rest_framework_simplejwt.models.TokenUser',
+    'JTI_CLAIM': 'jti',
+    'SLIDING_TOKEN_REFRESH_EXP_CLAIM': 'refresh_exp',
+    'SLIDING_TOKEN_LIFETIME': timedelta(minutes=5),
+    'SLIDING_TOKEN_REFRESH_LIFETIME': timedelta(days=1),
+    'TOKEN_OBTAIN_SERIALIZER': 'rest_framework_simplejwt.serializers.TokenObtainPairSerializer',  # Add this
+    'TOKEN_REFRESH_SERIALIZER': 'rest_framework_simplejwt.serializers.TokenRefreshSerializer',  # Add this
+    'TOKEN_VERIFY_SERIALIZER': 'rest_framework_simplejwt.serializers.TokenVerifySerializer',  # Add this
 }
 
 # ====== Internationalization ======
@@ -158,6 +196,8 @@ USE_TZ = True
 
 # ====== Static Files ======
 STATIC_URL = 'static/'
+STATIC_ROOT = BASE_DIR / 'staticfiles'  # For production
+STATICFILES_DIRS = [BASE_DIR / 'static']  # For development
 
 # ====== Templates ======
 TEMPLATES = [
@@ -200,3 +240,17 @@ if not DEBUG:
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
     SECURE_SSL_REDIRECT = True
+
+# Explicitly set admin login path
+ADMIN_LOGIN_URL = '/admin/login/'
+LOGIN_URL = ADMIN_LOGIN_URL
+LOGIN_REDIRECT_URL = '/admin/'
+LOGOUT_REDIRECT_URL = '/admin/'
+
+# from rest_framework_simplejwt.tokens import RefreshToken
+import warnings
+warnings.filterwarnings(
+    "ignore",
+    category=UserWarning,
+    module="dj_rest_auth.registration.serializers"
+)
