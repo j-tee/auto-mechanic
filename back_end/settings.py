@@ -111,6 +111,10 @@ AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
 ]
 
+# REST_AUTH_SERIALIZERS = {
+#     "LOGIN_SERIALIZER": "dj_rest_auth.serializers.LoginSerializer",
+#     "USER_DETAILS_SERIALIZER": "dj_rest_auth.serializers.UserDetailsSerializer",
+# }
 # Allauth settings
 SITE_ID = 1
 # Tell allauth what your username field is (if using default Django user model)
@@ -124,13 +128,8 @@ ACCOUNT_SIGNUP_FIELDS = ["username", "email", "password1", "password2"]
 ACCOUNT_LOGIN_METHODS = ["email"]  # or just ["email"] if you prefer
 ACCOUNT_EMAIL_VERIFICATION = "mandatory" if ENVIRONMENT == "production" else "none"
 
-# Admin login
-ADMIN_LOGIN_PATH = 'admin/login/'
-LOGIN_URL = f'/{ADMIN_LOGIN_PATH}'
-LOGIN_REDIRECT_URL = '/admin/'
-
 # ====== REST Framework & JWT ======
-REST_USE_JWT = True
+# REST_USE_JWT = True
 
 # Configure dj_rest_auth to use JWT properly
 REST_AUTH = {
@@ -240,6 +239,12 @@ if not DEBUG:
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
     SECURE_SSL_REDIRECT = True
+
+# ====== Admin Fix ======
+# Use the standard Django admin login
+# ACCOUNT_LOGOUT_ON_GET = True  # Fixes allauth logout issues
+# ACCOUNT_DEFAULT_HTTP_PROTOCOL = 'http' if DEBUG else 'https'
+# ACCOUNT_EMAIL_CONFIRMATION_AUTHENTICATED_REDIRECT_URL = '/admin/'
 
 # Explicitly set admin login path
 ADMIN_LOGIN_URL = '/admin/login/'
